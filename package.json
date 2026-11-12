@@ -1,0 +1,20 @@
+{
+  "name": "outreach",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "db:setup": "node --env-file=.env.local scripts/migrate.mjs",
+    "test": "node --test lib/leads.test.js lib/server/auth.test.js lib/server/validate.test.js lib/server/patch.test.js"
+  },
+  "dependencies": {
+    "next": "^16.4.6",
+    "papaparse": "^5.7.1",
+    "postgres": "^4.1.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  }
+}
