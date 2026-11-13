@@ -95,6 +95,9 @@ code { background: var(--raised); padding: 1px 6px; border-radius: 4px; }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 .btn.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
 .btn.primary:disabled { background: var(--accent-track); border-color: var(--accent-track); color: var(--accent-ink); }
+.btn.danger { background: var(--negative); border-color: var(--negative); color: #fff; }
+.btn.danger:hover:not(:disabled) { background: #a51f24; border-color: #a51f24; }
+.btn.danger:disabled { background: #f6d6d7; border-color: #f6d6d7; color: #8a1d21; }
 .btn.wide { width: 100%; }
 .btn.small-btn { height: 28px; padding: 0 10px; font-size: 13px; }
 .btn.ok { background: #dcfce7; border-color: #dcfce7; color: #14532d; }
@@ -117,6 +120,8 @@ textarea:focus, select:focus, input:focus { border-color: var(--accent); }
   background-color: var(--accent); border-color: var(--accent);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m2.5 6.5 2.3 2.3L9.5 3.7'/%3E%3C/svg%3E");
 }
+.tick.danger:checked { background-color: var(--negative); border-color: var(--negative); }
+.tick.danger:hover { border-color: var(--negative); }
 .check { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; }
 
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 16px; }
@@ -137,6 +142,7 @@ table.grid { width: 100%; border-collapse: collapse; }
 .grid tbody tr:last-child td { border-bottom: 0; }
 .grid tbody tr:hover { background: #fdfafb; }
 .grid tr.picked, .grid tr.picked:hover { background: var(--accent-soft); }
+.grid tr.marked, .grid tr.marked:hover { background: #fdecec; }
 .grid th.num, .grid td.num { text-align: right; }
 .c-check { width: 44px; padding-right: 0 !important; }
 .c-name { min-width: 220px; }
@@ -150,6 +156,11 @@ table.grid { width: 100%; border-collapse: collapse; }
 .c-addr { min-width: 140px; max-width: 200px; color: var(--muted); font-size: 13px; }
 .leads th, .leads td { padding-left: 12px; padding-right: 12px; }
 .c-note { max-width: 240px; color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.c-del { width: 44px; padding-left: 0 !important; text-align: right; }
+.icon-btn.del:hover { background: #fdecec; color: var(--negative); }
+.text-btn.danger { color: var(--negative); }
+.text-btn.danger:hover { background: #fdecec; color: #a51f24; }
+.danger-zone { padding-top: 16px; border-top: 1px solid var(--rule); }
 .c-actions { width: 1%; white-space: nowrap; }
 .actions { display: flex; gap: 8px; justify-content: flex-end; }
 td a { text-decoration: underline; text-decoration-color: var(--control); text-underline-offset: 3px; }
@@ -271,7 +282,7 @@ tr.none td { padding: 40px 16px; text-align: center; color: var(--muted); }
 .bottombar { display: none; }
 
 /* ---------- tablet and phone ---------- */
-@media (max-width: 1180px) {
+@media (max-width: 1380px) {
   .split { grid-template-columns: minmax(0, 1fr); }
   .rail {
     position: fixed; z-index: 15; left: 16px; right: 16px; bottom: 16px; top: auto; display: flex; align-items: center; justify-content: space-between;
@@ -304,7 +315,7 @@ tr.none td { padding: 40px 16px; text-align: center; color: var(--muted); }
   .strip .cell { border-bottom: 1px solid var(--rule); }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   .table-wrap { max-height: none; overflow: visible; }
   .grid thead { display: none; }
   .grid, .grid tbody { display: block; }
@@ -329,7 +340,7 @@ tr.none td { padding: 40px 16px; text-align: center; color: var(--muted); }
 .outreach .c-contact, .prospects .c-contact { min-width: 170px; max-width: 200px; }
 .btn.small-btn { white-space: nowrap; }
 
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   .grid td[data-label] { display: flex; align-items: baseline; gap: 8px; font-size: 13.5px; }
   .grid td[data-label]::before { flex: none; width: 74px; }
   .grid td .stack { flex-direction: row; flex-wrap: wrap; gap: 2px 14px; min-width: 0; }
@@ -337,4 +348,128 @@ tr.none td { padding: 40px 16px; text-align: center; color: var(--muted); }
   .rail h2 { font-size: 14px; white-space: nowrap; }
   .rail-head { gap: 8px; }
   .rail .btn { padding: 0 12px; }
+}
+
+
+/* ---------- phone refinements ---------- */
+.tick-hit { display: grid; place-items: center; }
+.short { display: none; }
+.account, .menu-scrim { display: none; }
+
+@media (max-width: 900px) {
+  .account { display: block; position: relative; }
+  .avatar-btn { display: grid; place-items: center; width: 44px; height: 44px; margin-right: -6px; padding: 0; border: 0; border-radius: 50%; background: none; }
+  .avatar-btn:hover .avatar { outline: 2px solid var(--accent-track); }
+  .menu-scrim { display: block; position: fixed; inset: 0; z-index: 40; }
+  .menu { position: absolute; z-index: 41; top: 48px; right: 0; width: 240px; padding: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 12px 32px rgba(29, 21, 25, 0.18); /* taste-skill-ignore */ }
+  .menu-email { padding: 8px 10px 10px; font-size: 13px; color: var(--muted); overflow-wrap: anywhere; border-bottom: 1px solid var(--rule); margin-bottom: 4px; }
+  .menu-item { display: flex; align-items: center; gap: 10px; width: 100%; height: 44px; padding: 0 10px; border: 0; border-radius: 6px; background: none; text-align: left; font-weight: 500; }
+  .menu-item:hover { background: var(--raised); }
+  .bottombar { padding-bottom: env(safe-area-inset-bottom); height: calc(64px + env(safe-area-inset-bottom)); }
+  .rail { bottom: calc(76px + env(safe-area-inset-bottom)); }
+}
+
+@media (max-width: 900px) {
+  /* text fields at 16px so phones do not zoom in when you tap them */
+  select, textarea, input[type=email], input[type=password], .search input { font-size: 16px; }
+  select, input[type=email], input[type=password] { height: 44px; }
+  .search { height: 44px; }
+
+  .topbar { gap: 8px; height: 60px; padding: 0 12px 0 16px; }
+  .import-btn { width: 44px; height: 44px; padding: 0; flex: none; }
+  .import-btn span { display: none; }
+  .canvas { padding: 16px 16px calc(150px + env(safe-area-inset-bottom)); }
+  .title-row { margin-bottom: 16px; }
+  .title-row h1 { font-size: 26px; }
+  .title-row p { font-size: 14px; }
+
+  /* filters */
+  .toolbar { gap: 10px; }
+  .toolbar > * { flex: 1 1 100%; }
+  .toolbar .grow { display: none; }
+  .toolbar .btn { flex: 1 1 calc(50% - 5px); height: 44px; }
+  .seg { display: flex; }
+  .seg button { flex: 1; height: 40px; padding: 0 6px; font-size: 13.5px; white-space: nowrap; }
+  .seg button span { margin-left: 3px; }
+
+  /* cards */
+  .grid tbody tr { position: relative; gap: 8px 12px; padding: 14px 16px; }
+  .grid .c-check { padding: 0 !important; margin: -10px 0 0 -12px; }
+  .tick { width: 24px; height: 24px; border-radius: 6px; background-size: 15px; }
+  .tick-hit { width: 48px; height: 48px; }
+  .leads .c-name { padding-top: 2px; }
+  .name { font-size: 16px; padding: 2px 0; }
+  .sub { font-size: 13px; }
+  .grid td[data-label] { min-height: 28px; }
+  .c-contact a, .c-site a { padding: 6px 0; }
+  .grid td .stack { gap: 0 14px; }
+  .chips { gap: 6px; }
+  .chip { min-width: 40px; height: 36px; font-size: 13px; border-radius: 8px; }
+  .stage-select { height: 40px; font-size: 14px; padding: 0 32px 0 14px; background-position: right 12px center; }
+  .btn.small-btn { height: 40px; padding: 0 14px; font-size: 14px; }
+  .actions { gap: 8px; }
+  .actions .btn { flex: 1 1 auto; }
+  .outreach .c-name, .prospects .c-name { min-width: 0; padding-right: 48px; }
+  .c-del { position: absolute; top: 6px; right: 6px; width: 44px; height: 44px; padding: 0 !important; }
+  .c-del .icon-btn { width: 44px; height: 44px; }
+  .c-note { white-space: normal; }
+  .strip .cell { padding: 12px 14px 14px; }
+  .cell-value { font-size: 24px; }
+
+  /* the docked outreach bar */
+  .rail { left: 12px; right: 12px; gap: 10px; padding: 8px 8px 8px 14px; }
+  .rail-head { flex: 1; min-width: 0; }
+  .rail h2 { overflow: hidden; text-overflow: ellipsis; }
+  .rail .btn { flex: none; width: auto; height: 40px; }
+  .long { display: none; }
+  .short { display: inline; }
+
+  /* message: at the top, clear of the bars at the bottom */
+  .toast { top: 68px; bottom: auto; width: calc(100% - 24px); max-width: 460px; justify-content: space-between; }
+  .toast button { min-height: 32px; padding: 0 6px; }
+
+  /* the side panel and dialog use the whole screen */
+  .scrim.center { padding: 0; align-items: flex-end; }
+  .dialog { width: 100%; max-height: 92vh; border-radius: 16px 16px 0 0; padding: 20px 16px calc(20px + env(safe-area-inset-bottom)); }
+  .dialog-foot .btn { flex: 1; height: 44px; }
+  .drawer-head { position: sticky; top: 0; z-index: 2; padding: 16px; background: var(--surface); }
+  .drawer-head h2 { font-size: 20px; }
+  .drawer-head .icon-btn, .dialog-head .icon-btn { width: 44px; height: 44px; margin: -8px -8px 0 0; }
+  .drawer-body { padding: 0 16px calc(32px + env(safe-area-inset-bottom)); }
+  .drawer .stage-select { height: 44px; }
+  .drawer .btn, .text-btn { min-height: 44px; }
+  .label-row { min-height: 32px; }
+  .facts a:not(.chip) { display: inline-block; padding: 4px 0; }
+
+  /* sign-in: the form is the first thing you see */
+  .login-art { padding: 20px 20px 24px; gap: 20px; }
+  .login-art h1 { font-size: 30px; max-width: none; }
+  .login-art p { display: none; }
+  .login-form { place-items: start center; padding: 24px 20px 40px; }
+  .login-form input { height: 48px; }
+  .login-form .btn { height: 48px; }
+}
+
+
+/* cards: a long email or address may use the whole card width (the table's column limits do not apply) */
+@media (max-width: 900px) {
+  .grid td.c-contact, .grid td.c-site, .grid td.c-addr, .grid td.c-note { max-width: none; min-width: 0; }
+  .grid td.c-contact a, .grid td.c-site a { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
+}
+
+/* desktop: the outreach and prospects tables have eight columns, so keep the spacing tight enough to fit a laptop screen */
+@media (min-width: 901px) {
+  .outreach th, .outreach td, .prospects th, .prospects td { padding-left: 10px; padding-right: 10px; }
+  .outreach .c-name, .prospects .c-name { min-width: 136px; }
+  .outreach .c-site, .prospects .c-site { max-width: 104px; }
+  .outreach .c-contact, .prospects .c-contact { min-width: 140px; max-width: 160px; }
+  .outreach .c-social, .prospects .c-social { min-width: 80px; }
+  .outreach th.c-del, .outreach td.c-del, .prospects th.c-del, .prospects td.c-del { width: 36px; padding-left: 0 !important; padding-right: 6px !important; }
+  .outreach .actions { gap: 6px; }
+  .outreach .actions .btn { padding: 0 8px; gap: 5px; }
+}
+
+/* docked outreach bar: start after the sidebar, not on top of it */
+@media (min-width: 901px) and (max-width: 1380px) {
+  .rail { left: calc(220px + 16px); }
 }

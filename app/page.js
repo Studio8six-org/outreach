@@ -20,6 +20,7 @@ export default function Home() {
   const [configured, setConfigured] = useState(true);
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null); // why the list could not be loaded, if it could not
   const [tab, setTab] = useState("leads");
   const [query, setQuery] = useState("");
   const [showImport, setShowImport] = useState(false);
@@ -67,7 +68,9 @@ export default function Home() {
     try {
       const d = await api("/api/leads");
       if (saving.current === 0) setLeads(d.leads);
+      setLoadError(null);
     } catch (err) {
+      setLoadError(err.message);
       if (err.status === 401) return router.replace("/login");
       if (!quiet) say(`Could not load leads: ${err.message}`);
     } finally {
@@ -125,6 +128,30 @@ export default function Home() {
     change([lead.id], { stage }, stage === "responded" ? `${lead.business} moved to Prospects` : undefined, stage === "responded");
   const setNotes = (lead, notes) => change([lead.id], { notes });
 
+  // Delete for good. Asks first (nothing can bring it back), hides the rows at once, puts them back if it fails.
+  // Returns true when they are gone.
+  async function remove(list) {
+    if (!list.length) return false;
+    const what = list.length === 1 ? `"${list[0].business}"` : `${list.length} businesses`;
+    if (!window.confirm(`Delete ${what}? This removes ${list.length === 1 ? "it" : "them"} and the history for good. It cannot be undone.`)) return false;
+    const ids = list.map((l) => l.id);
+    setLeads((all) => all.filter((l) => !ids.includes(l.id)));
+    setOpenId((o) => (ids.includes(o) ? null : o));
+    saving.current++;
+    try {
+      for (let i = 0; i < ids.length; i += 500) await api("/api/leads/delete", { ids: ids.slice(i, i + 500) });
+      say(list.length === 1 ? "Deleted" : `${list.length} businesses deleted`);
+      return true;
+    } catch (err) {
+      setLeads((all) => [...all, ...list.filter((l) => !all.some((a) => a.id === l.id))].sort((a, b) => a.id - b.id));
+      if (err.status === 401) router.replace("/login");
+      else say(`Could not delete: ${err.message}`);
+      return false;
+    } finally {
+      saving.current--;
+    }
+  }
+
   async function signOut() {
     await api("/api/logout", {}).catch(() => {});
     router.replace("/login");
@@ -134,6 +161,7 @@ export default function Home() {
   const prospects = useMemo(() => leads.filter((l) => l.stage === "responded"), [leads]);
   const counts = { leads: leads.filter((l) => !l.stage).length, outreach: outreach.length, prospects: prospects.length };
   const open = leads.find((l) => l.id === openId);
+  const failed = loadError && !leads.length; // never show "no leads" when we simply could not load them
 
   if (!configured) {
     return (
@@ -168,18 +196,33 @@ export default function Home() {
       <div className="title-row">
         <div>
           <h1>{heading[0]}</h1>
-          <p className="muted">{loading ? "Loading..." : heading[1]}</p>
+          <p className="muted">{loading ? "Loading..." : failed ? "Could not load the list" : heading[1]}</p>
         </div>
       </div>
 
       {loading ? (
         <Skeleton />
+      ) : failed ? (
+        <div className="empty">
+          <h2>Could not load your leads</h2>
+          <p>{loadError.endsWith(".") ? loadError.slice(0, -1) : loadError}. Nothing has been lost: your data is safe in the database.</p>
+          <button
+            className="btn primary"
+            onClick={() => {
+              setLoading(true);
+              load();
+            }}
+          >
+            Try again
+          </button>
+        </div>
       ) : tab === "leads" ? (
         <LeadsTable
           leads={leads}
           query={query}
           onSelect={select}
           onUnselect={unselect}
+          onDelete={remove}
           onOpen={(l) => setOpenId(l.id)}
           onGoOutreach={() => goTab("outreach")}
           onImport={() => setShowImport(true)}
@@ -191,12 +234,13 @@ export default function Home() {
           rows={tab === "outreach" ? outreach : prospects}
           query={query}
           onStage={setStage}
+          onDelete={remove}
           onOpen={(l) => setOpenId(l.id)}
           onGoLeads={() => goTab("leads")}
         />
       )}
 
-      {open && <Drawer key={open.id} lead={open} onClose={() => setOpenId(null)} onStage={setStage} onNotes={setNotes} />}
+      {open && <Drawer key={open.id} lead={open} onClose={() => setOpenId(null)} onStage={setStage} onNotes={setNotes} onDelete={remove} />}
       {showImport && <ImportDialog onDone={() => load(true)} onClose={() => setShowImport(false)} />}
 
       {toast && (

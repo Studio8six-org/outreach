@@ -5,6 +5,8 @@ export const metadata = {
   description: "Pick businesses, reach out, and track who responds.",
 };
 
+export const viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">

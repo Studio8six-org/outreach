@@ -10,7 +10,7 @@ import { Icon } from "./Icons";
 const when = (iso) =>
   new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
-export default function Drawer({ lead, onClose, onStage, onNotes }) {
+export default function Drawer({ lead, onClose, onStage, onNotes, onDelete }) {
   const [events, setEvents] = useState(null);
   const [notes, setNotes] = useState(lead.notes);
   const [saved, setSaved] = useState(false);
@@ -135,6 +135,12 @@ export default function Drawer({ lead, onClose, onStage, onNotes }) {
             ) : (
               <p className="muted">Nothing yet. Selecting this business starts its history.</p>
             )}
+          </section>
+
+          <section className="drawer-block danger-zone">
+            <button className="text-btn danger" onClick={() => onDelete([lead])}>
+              <Icon name="trash" size={14} /> Delete this business
+            </button>
           </section>
         </div>
       </aside>

@@ -12,8 +12,10 @@ const VIEWS = [
   { key: "all", label: "All" },
 ];
 
-export default function LeadsTable({ leads, query, onSelect, onUnselect, onOpen, onGoOutreach, onImport }) {
+export default function LeadsTable({ leads, query, onSelect, onUnselect, onDelete, onOpen, onGoOutreach, onImport }) {
   const [view, setView] = useState("pick");
+  const [del, setDel] = useState(false); // delete mode: ticks mark rows for deleting instead of adding to outreach
+  const [marked, setMarked] = useState(() => new Set());
   const [type, setType] = useState("");
   const lastTicked = useRef(null); // for shift-click ranges
 
@@ -44,7 +46,34 @@ export default function LeadsTable({ leads, query, onSelect, onUnselect, onOpen,
     return n <= 25 || window.confirm(`Add ${n} businesses to outreach?`);
   }
 
+  const markedList = leads.filter((l) => marked.has(l.id));
+  const leaveDelete = () => {
+    setDel(false);
+    setMarked(new Set());
+    lastTicked.current = null;
+  };
+
+  function markRow(lead, index, event) {
+    const next = new Set(marked);
+    if (event.shiftKey && lastTicked.current !== null) {
+      const [a, b] = [lastTicked.current, index].sort((x, y) => x - y);
+      const on = !marked.has(lead.id);
+      visible.slice(a, b + 1).forEach((l) => (on ? next.add(l.id) : next.delete(l.id)));
+    } else if (next.has(lead.id)) {
+      next.delete(lead.id);
+    } else {
+      next.add(lead.id);
+    }
+    lastTicked.current = index;
+    setMarked(next);
+  }
+
+  async function deleteMarked() {
+    if (await onDelete(markedList)) leaveDelete();
+  }
+
   function tick(lead, index, event) {
+    if (del) return markRow(lead, index, event);
     if (inOutreach(lead)) return onUnselect(lead);
     // Shift-click ticks everything between the last tick and this row
     if (event.shiftKey && lastTicked.current !== null) {
@@ -93,9 +122,26 @@ export default function LeadsTable({ leads, query, onSelect, onUnselect, onOpen,
             {types.map((t) => <option key={t}>{t}</option>)}
           </select>
           <span className="grow" />
-          <button className="btn" onClick={selectAllShown} disabled={!unpicked.length}>
-            Select all shown <b>{unpicked.length}</b>
-          </button>
+          {del ? (
+            <>
+              <button className="btn" onClick={() => setMarked(new Set(visible.map((l) => l.id)))} disabled={!visible.length}>
+                Mark all shown <b>{visible.length}</b>
+              </button>
+              <button className="btn danger" onClick={deleteMarked} disabled={!markedList.length}>
+                <Icon name="trash" size={15} /> Delete {markedList.length || ""}
+              </button>
+              <button className="btn" onClick={leaveDelete}>Cancel</button>
+            </>
+          ) : (
+            <>
+              <button className="btn" onClick={selectAllShown} disabled={!unpicked.length}>
+                Select all shown <b>{unpicked.length}</b>
+              </button>
+              <button className="btn" onClick={() => setDel(true)}>
+                <Icon name="trash" size={15} /> Delete…
+              </button>
+            </>
+          )}
         </div>
 
         <div className="panel table-wrap">
@@ -112,16 +158,18 @@ export default function LeadsTable({ leads, query, onSelect, onUnselect, onOpen,
             </thead>
             <tbody>
               {visible.map((l, i) => (
-                <tr key={l.id} className={inOutreach(l) ? "picked" : ""}>
+                <tr key={l.id} className={del ? (marked.has(l.id) ? "marked" : "") : inOutreach(l) ? "picked" : ""}>
                   <td className="c-check">
+                    <label className="tick-hit">
                     <input
                       type="checkbox"
-                      className="tick"
-                      aria-label={`Select ${l.business}`}
-                      checked={inOutreach(l)}
+                      className={del ? "tick danger" : "tick"}
+                      aria-label={`${del ? "Mark for deleting" : "Select"} ${l.business}`}
+                      checked={del ? marked.has(l.id) : inOutreach(l)}
                       onChange={() => {}}
                       onClick={(e) => tick(l, i, e)}
                     />
+                    </label>
                   </td>
                   <td className="c-name">
                     <button className="name" onClick={() => onOpen(l)}>{l.business}</button>
@@ -148,7 +196,9 @@ export default function LeadsTable({ leads, query, onSelect, onUnselect, onOpen,
             </tbody>
           </table>
         </div>
-        <p className="hint">Tip: hold Shift and tick a second business to select everything in between.</p>
+        <p className="hint">
+          {del ? "Delete mode: tick the businesses to remove for good, then press Delete." : "Tip: hold Shift and tick a second business to select everything in between."}
+        </p>
       </section>
 
       <aside className="rail" aria-label="Your outreach list">
@@ -177,7 +227,7 @@ export default function LeadsTable({ leads, query, onSelect, onUnselect, onOpen,
         )}
         {mine.length > 8 && <p className="rail-more">and {mine.length - 8} more</p>}
         <button className="btn primary wide" onClick={onGoOutreach} disabled={!mine.length}>
-          Open outreach table <Icon name="arrow" size={15} />
+          <span className="long">Open outreach table</span><span className="short">Open</span> <Icon name="arrow" size={15} />
         </button>
       </aside>
     </div>

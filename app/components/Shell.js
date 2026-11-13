@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Icon, Mark } from "./Icons";
 
@@ -12,6 +12,7 @@ const NAV = [
 
 export default function Shell({ tab, onTab, counts, query, onQuery, onImport, email, onSignOut, children }) {
   const search = useRef(null);
+  const [menu, setMenu] = useState(false); // account menu, shown on phones only
 
   // "/" jumps to search, like most work tools
   useEffect(() => {
@@ -80,9 +81,25 @@ export default function Shell({ tab, onTab, counts, query, onQuery, onImport, em
             <kbd>/</kbd>
           </div>
           <span className="grow" />
-          <button className="btn" onClick={onImport}>
-            <Icon name="upload" size={15} /> Import leads
+          <button className="btn import-btn" onClick={onImport} aria-label="Import leads">
+            <Icon name="upload" size={15} /> <span>Import leads</span>
           </button>
+          <div className="account">
+            <button className="avatar-btn" onClick={() => setMenu((m) => !m)} aria-label="Account" aria-expanded={menu}>
+              <span className="avatar" aria-hidden="true">{initial}</span>
+            </button>
+            {menu && (
+              <>
+                <div className="menu-scrim" onClick={() => setMenu(false)} />
+                <div className="menu" role="menu">
+                  <p className="menu-email">{email}</p>
+                  <button className="menu-item" role="menuitem" onClick={onSignOut}>
+                    <Icon name="out" size={16} /> Sign out
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </header>
         <main className="canvas">{children}</main>
       </div>

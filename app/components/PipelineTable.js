@@ -14,7 +14,7 @@ const date = (iso) => (iso ? new Date(iso).toLocaleDateString(undefined, { day: 
  * mode "outreach": leads still being worked, with the stage strip and one-click next steps
  * mode "prospects": leads that responded
  */
-export default function PipelineTable({ mode, rows, query, onStage, onOpen, onGoLeads }) {
+export default function PipelineTable({ mode, rows, query, onStage, onDelete, onOpen, onGoLeads }) {
   const [filter, setFilter] = useState("");
   const prospects = mode === "prospects";
 
@@ -75,12 +75,14 @@ export default function PipelineTable({ mode, rows, query, onStage, onOpen, onGo
                   <th>Handled by</th>
                   <th>Notes</th>
                   <th className="c-stage">Stage</th>
+                  <th className="c-del"><span className="sr">Delete</span></th>
                 </>
               ) : (
                 <>
                   <th>Stage</th>
                   <th className="num">Waiting</th>
                   <th className="c-actions">Next step</th>
+                  <th className="c-del"><span className="sr">Delete</span></th>
                 </>
               )}
             </tr>
@@ -107,6 +109,7 @@ export default function PipelineTable({ mode, rows, query, onStage, onOpen, onGo
                       <td className="c-stage">
                         <StageSelect lead={l} onStage={onStage} />
                       </td>
+                      <td className="c-del"><DeleteBtn lead={l} onDelete={onDelete} /></td>
                     </>
                   ) : (
                     <>
@@ -129,18 +132,27 @@ export default function PipelineTable({ mode, rows, query, onStage, onOpen, onGo
                           )}
                         </div>
                       </td>
+                      <td className="c-del"><DeleteBtn lead={l} onDelete={onDelete} /></td>
                     </>
                   )}
                 </tr>
               );
             })}
             {!shown.length && (
-              <tr className="none"><td colSpan={prospects ? 8 : 7}>Nothing matches.</td></tr>
+              <tr className="none"><td colSpan={prospects ? 9 : 8}>Nothing matches.</td></tr>
             )}
           </tbody>
         </table>
       </div>
     </>
+  );
+}
+
+function DeleteBtn({ lead, onDelete }) {
+  return (
+    <button className="icon-btn del" onClick={() => onDelete([lead])} aria-label={`Delete ${lead.business}`} title="Delete">
+      <Icon name="trash" size={16} />
+    </button>
   );
 }
 
