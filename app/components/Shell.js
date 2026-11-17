@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { Icon, Mark } from "./Icons";
@@ -10,7 +11,8 @@ const NAV = [
   { key: "prospects", label: "Prospects", icon: "star" },
 ];
 
-export default function Shell({ tab, onTab, counts, query, onQuery, onImport, email, onSignOut, children }) {
+// Website analytics lives on its own page. `hideTools` hides the lead search and import button there.
+export default function Shell({ tab, onTab, counts = {}, query, onQuery, onImport, email, onSignOut, hideTools = false, children }) {
   const search = useRef(null);
   const [menu, setMenu] = useState(false); // account menu, shown on phones only
 
@@ -54,6 +56,15 @@ export default function Shell({ tab, onTab, counts, query, onQuery, onImport, em
               <span className="nav-count">{counts[n.key]}</span>
             </a>
           ))}
+          <div className="nav-group">Website</div>
+          <Link
+            href="/analytics"
+            className={`nav-item ${tab === "analytics" ? "on" : ""}`}
+            aria-current={tab === "analytics" ? "page" : undefined}
+          >
+            <Icon name="chart" />
+            <span>Analytics</span>
+          </Link>
         </nav>
         <div className="side-foot">
           <div className="who">
@@ -68,6 +79,7 @@ export default function Shell({ tab, onTab, counts, query, onQuery, onImport, em
 
       <div className="main">
         <header className="topbar">
+          {!hideTools && (
           <div className="search">
             <Icon name="search" size={15} />
             <input
@@ -80,10 +92,13 @@ export default function Shell({ tab, onTab, counts, query, onQuery, onImport, em
             />
             <kbd>/</kbd>
           </div>
+          )}
           <span className="grow" />
+          {!hideTools && (
           <button className="btn import-btn" onClick={onImport} aria-label="Import leads">
             <Icon name="upload" size={15} /> <span>Import leads</span>
           </button>
+          )}
           <div className="account">
             <button className="avatar-btn" onClick={() => setMenu((m) => !m)} aria-label="Account" aria-expanded={menu}>
               <span className="avatar" aria-hidden="true">{initial}</span>
@@ -119,6 +134,10 @@ export default function Shell({ tab, onTab, counts, query, onQuery, onImport, em
             <span>{n.label}</span>
           </a>
         ))}
+        <Link href="/analytics" className={tab === "analytics" ? "on" : ""}>
+          <Icon name="chart" size={20} />
+          <span>Analytics</span>
+        </Link>
       </nav>
     </div>
   );

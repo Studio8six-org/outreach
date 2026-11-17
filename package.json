@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "db:setup": "node --env-file=.env.local scripts/migrate.mjs",
-    "test": "node --test lib/leads.test.js lib/server/auth.test.js lib/server/validate.test.js lib/server/patch.test.js"
+    "test": "node --test lib/leads.test.js lib/server/auth.test.js lib/server/validate.test.js lib/server/patch.test.js lib/server/analytics.test.js"
   },
   "dependencies": {
     "next": "^16.4.6",

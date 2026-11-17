@@ -14,7 +14,8 @@ try {
   await sql.unsafe(readFileSync(new URL("../supabase/schema.sql", import.meta.url), "utf8"));
   const [{ n: leads }] = await sql`select count(*)::int n from leads`;
   const [{ n: events }] = await sql`select count(*)::int n from events`;
-  console.log(`Done. Tables ready (leads: ${leads}, events: ${events}).`);
+  const [{ n: visits }] = await sql`select count(*)::int n from analytics_events`;
+  console.log(`Done. Tables ready (leads: ${leads}, events: ${events}, analytics events: ${visits}).`);
 } catch (err) {
   console.error("Setup failed:", err.message);
   process.exitCode = 1;
