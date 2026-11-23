@@ -22,6 +22,9 @@ create table if not exists leads (
   created_at       timestamptz not null default now()
 );
 
+-- Which import a lead came from (Schools, Shortlets - Lagos...). Safe to run again.
+alter table leads add column if not exists list_name text not null default '';
+
 create table if not exists events (
   id          integer generated always as identity primary key,
   lead_id     integer not null references leads(id) on delete cascade,

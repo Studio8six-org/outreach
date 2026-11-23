@@ -9,10 +9,11 @@ import { Icon } from "./Icons";
 
 const CHUNK = 150; // each batch is one trip to the database
 
-export default function ImportDialog({ onDone, onClose }) {
+export default function ImportDialog({ lists = [], onDone, onClose }) {
   const [rows, setRows] = useState(null);
   const [fileName, setFileName] = useState("");
-  const [okOnly, setOkOnly] = useState(true);
+  const [listName, setListName] = useState("");
+  const [okOnly, setOkOnly] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
@@ -51,7 +52,7 @@ export default function ImportDialog({ onDone, onClose }) {
     try {
       let added = 0;
       for (let i = 0; i < plan.leads.length; i += CHUNK) {
-        const res = await api("/api/leads/import", { leads: plan.leads.slice(i, i + CHUNK) });
+        const res = await api("/api/leads/import", { leads: plan.leads.slice(i, i + CHUNK), list: listName.trim() });
         added += res.added;
       }
       setResult({ added, existing: plan.leads.length - added });
@@ -87,9 +88,14 @@ export default function ImportDialog({ onDone, onClose }) {
 
         {plan && (
           <div className="plan">
+            <label className="field">
+              <span className="label">List name</span>
+              <input type="text" list="known-lists" maxLength={60} value={listName} onChange={(e) => setListName(e.target.value)} placeholder="For example: Shortlets - Lagos" />
+              <datalist id="known-lists">{lists.map((n) => <option key={n} value={n} />)}</datalist>
+            </label>
             <label className="check">
               <input type="checkbox" className="tick" checked={okOnly} onChange={(e) => setOkOnly(e.target.checked)} />
-              Only businesses with a working website
+              Only businesses with a working website (skip the rest)
             </label>
             <p className="plan-count"><b>{plan.leads.length}</b> businesses will be imported</p>
             <ul className="muted">
@@ -112,7 +118,7 @@ export default function ImportDialog({ onDone, onClose }) {
         <footer className="dialog-foot">
           <button className="btn" onClick={onClose}>{result ? "Done" : "Cancel"}</button>
           {!result && (
-            <button className="btn primary" onClick={run} disabled={busy || !plan?.leads.length}>
+            <button className="btn primary" onClick={run} disabled={busy || !plan?.leads.length || !listName.trim()}>
               {busy ? "Importing..." : plan ? `Import ${plan.leads.length}` : "Import"}
             </button>
           )}
