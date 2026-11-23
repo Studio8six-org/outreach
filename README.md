@@ -88,3 +88,13 @@ Light only. One raspberry colour: the strong shade only on small marks (buttons,
 - Reminders and message templates
 - A results dashboard
 - A shared do-not-contact list
+
+## Website analytics
+
+The studio8six website sends small events to this app, and the **Analytics** page (left menu) shows them. You see visits, where they came from (Google, Instagram, a tagged link), and how many asked for work.
+
+- **Public door:** `POST /api/track`. No login, so it only accepts requests from studio8six.com, checks every field, ignores bots and limits each address. Set `ANALYTICS_ORIGINS` (see `.env.example`) to test from `http://localhost:5173`.
+- **Private page:** `/analytics` needs the same login as the rest of the app.
+- **What is stored (table `analytics_events`):** the event type, a random per-tab label, the page, the source, device type and country. **Not stored:** names, emails, phone numbers, IP addresses, or cookies. Enquiry details still go only to your Google Sheet.
+- **Set up:** run `npm run db:setup` to create the table (safe to run again). On the website project set `VITE_ANALYTICS_URL` to this app's address plus `/api/track`, then redeploy the website.
+- **Count your own links:** add tags, for example `https://www.studio8six.com/?utm_source=instagram&utm_medium=bio`. Apps like Instagram often hide the referrer, so untagged clicks show as "Direct".
