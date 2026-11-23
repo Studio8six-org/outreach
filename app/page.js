@@ -22,6 +22,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null); // why the list could not be loaded, if it could not
   const [tab, setTab] = useState("leads");
+  const [list, setList] = useState(""); // "" = every list
   const [query, setQuery] = useState("");
   const [showImport, setShowImport] = useState(false);
   const [openId, setOpenId] = useState(null);
@@ -157,9 +158,16 @@ export default function Home() {
     router.replace("/login");
   }
 
-  const outreach = useMemo(() => leads.filter((l) => OUTREACH_STAGES.includes(l.stage)), [leads]);
-  const prospects = useMemo(() => leads.filter((l) => l.stage === "responded"), [leads]);
-  const counts = { leads: leads.filter((l) => !l.stage).length, outreach: outreach.length, prospects: prospects.length };
+  // Lists: one per import (Schools, Shortlets - Lagos...). Every screen shows the chosen list.
+  const lists = useMemo(() => {
+    const n = new Map();
+    for (const l of leads) n.set(l.list_name, (n.get(l.list_name) || 0) + 1);
+    return [...n].sort((a, b) => a[0].localeCompare(b[0]));
+  }, [leads]);
+  const scoped = useMemo(() => (list && lists.some(([n]) => n === list) ? leads.filter((l) => l.list_name === list) : leads), [leads, list, lists]);
+  const outreach = useMemo(() => scoped.filter((l) => OUTREACH_STAGES.includes(l.stage)), [scoped]);
+  const prospects = useMemo(() => scoped.filter((l) => l.stage === "responded"), [scoped]);
+  const counts = { leads: scoped.filter((l) => !l.stage).length, outreach: outreach.length, prospects: prospects.length };
   const open = leads.find((l) => l.id === openId);
   const failed = loadError && !leads.length; // never show "no leads" when we simply could not load them
 
@@ -200,6 +208,19 @@ export default function Home() {
         </div>
       </div>
 
+      {lists.length > 1 && (
+        <div className="lists" role="tablist" aria-label="Lists">
+          <button role="tab" aria-selected={!list} className={!list ? "on" : ""} onClick={() => setList("")}>
+            All lists <span>{leads.length}</span>
+          </button>
+          {lists.map(([n, c]) => (
+            <button key={n} role="tab" aria-selected={list === n} className={list === n ? "on" : ""} onClick={() => setList(n)}>
+              {n || "No list"} <span>{c}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {loading ? (
         <Skeleton />
       ) : failed ? (
@@ -218,7 +239,7 @@ export default function Home() {
         </div>
       ) : tab === "leads" ? (
         <LeadsTable
-          leads={leads}
+          leads={scoped}
           query={query}
           onSelect={select}
           onUnselect={unselect}
@@ -241,7 +262,7 @@ export default function Home() {
       )}
 
       {open && <Drawer key={open.id} lead={open} onClose={() => setOpenId(null)} onStage={setStage} onNotes={setNotes} onDelete={remove} />}
-      {showImport && <ImportDialog onDone={() => load(true)} onClose={() => setShowImport(false)} />}
+      {showImport && <ImportDialog lists={lists.map(([n]) => n)} onDone={() => load(true)} onClose={() => setShowImport(false)} />}
 
       {toast && (
         <div className="toast" role="status">

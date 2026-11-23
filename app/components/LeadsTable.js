@@ -94,7 +94,7 @@ export default function LeadsTable({ leads, query, onSelect, onUnselect, onDelet
     return (
       <div className="empty">
         <h2>No leads yet</h2>
-        <p>Import the CSV exported from LeadFinder. Only businesses with a working website are added.</p>
+        <p>Import the CSV exported from LeadFinder. Every business in the file is added, with or without a website.</p>
         <button className="btn primary" onClick={onImport}>
           <Icon name="upload" size={15} /> Import leads
         </button>

@@ -22,6 +22,7 @@ Three tables, one list of leads behind them:
 - **Click any business** to open its side panel: stage, contact details, the LeadFinder pitch (Copy button), notes that save by themselves, and the history of who moved it and when.
 - Changes by teammates appear within about 20 seconds. Your own changes show at once.
 - Press `/` to jump to search. Works on a phone too.
+- **Lists:** every import has a list name (for example "Schools" or "Shortlets - Lagos"). When there is more than one list, chips above the table switch all three screens between them. A business already in the database is skipped, even if it appears in another list.
 - **Delete:** on the Leads screen press **Delete…**, tick the businesses to remove, then press **Delete**. On Outreach and Prospects each row has a trash button, and every side panel has **Delete this business**. Deleting asks first, removes the business and its history for good, and cannot be undone.
 - **Phone and tablet:** below 900px wide the tables become cards with large tap targets, a bottom tab bar, and an account menu (top right) with Sign out.
 
